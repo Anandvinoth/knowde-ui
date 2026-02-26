@@ -106,20 +106,33 @@ export class KnowdeSearchComponent {
       // -----------------------------
       // 3️⃣ Detect & Apply Voice Filters
       // -----------------------------
-      const detectedFilters = this.detectFacetFilters(cleanQuery);
+      const isGenerate = this.meta?.intent === 'generate';
 
-      if (Object.keys(detectedFilters).length > 0) {
-        this.applyFilters(detectedFilters);
-        this.speak(`Filtered down to ${this.results.length} products.`);
+if (!isGenerate) {
+  const detectedFilters = this.detectFacetFilters(cleanQuery);
+
+    if (Object.keys(detectedFilters).length > 0) {
+      this.applyFilters(detectedFilters);
+      this.speak(`Filtered down to ${this.results.length} products.`);
+    } else {
+      const returned = data?.results?.meta?.returned ?? this.results.length;
+
+      if (this.results.length > 0) {
+        this.speak(`I found ${returned} relevant products.`);
       } else {
-        const returned = data?.results?.meta?.returned ?? this.results.length;
-
-        if (this.results.length > 0) {
-          this.speak(`I found ${returned} relevant products.`);
-        } else {
-          this.speak("I couldn't find matching products.");
-        }
+        this.speak("I couldn't find matching products.");
       }
+    }
+  } else {
+    // Generate mode: do not auto-filter
+    const returned = data?.results?.meta?.returned ?? this.results.length;
+
+    if (this.results.length > 0) {
+      this.speak(`Here is what I found.`);
+    } else {
+      this.speak("I couldn't find matching products.");
+    }
+  }
 
     } catch (error) {
       console.error(error);
